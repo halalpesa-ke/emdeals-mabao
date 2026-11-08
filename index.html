@@ -1,48 +1,74 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#071b16">
+  <meta name="description" content="EMDeals Mabao - Smart football predictions and match analysis.">
   <title>EMDeals Mabao | Smart Football Predictions</title>
+
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #071b16;
       color: #fff;
     }
+
     header {
       padding: 20px;
       background: #0b2b20;
       border-bottom: 2px solid #d9ad42;
       text-align: center;
     }
-    .logo { font-size: 27px; font-weight: 900; }
-    .logo span { color: #f2c34b; }
+
+    .logo {
+      font-size: 27px;
+      font-weight: 900;
+    }
+
+    .logo span, .gold { color: #f2c34b; }
+
     header p { color: #c7d5ce; margin-bottom: 0; }
+
     nav {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 18px;
       padding: 14px;
       background: #10271f;
     }
-    nav a { color: white; text-decoration: none; font-size: 14px; }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    nav a:hover { color: #f2c34b; }
+
     .hero {
       text-align: center;
       padding: 55px 18px;
       background: linear-gradient(140deg, #123d2c, #071b16);
     }
+
     .hero h1 { font-size: 34px; margin: 0 0 15px; }
     .hero h1 span { color: #f2c34b; }
-    .hero p { color: #d1ddd6; line-height: 1.7; }
+
+    .hero p {
+      color: #d1ddd6;
+      line-height: 1.7;
+    }
+
     .button {
       display: inline-block;
-      margin-top: 15px;
-      padding: 13px 24px;
+      margin: 8px 5px;
+      padding: 12px 20px;
       border: 0;
       border-radius: 7px;
       background: #f2c34b;
@@ -51,29 +77,54 @@
       text-decoration: none;
       cursor: pointer;
     }
-    main { max-width: 1050px; margin: auto; padding: 25px 16px; }
+
+    .button.secondary {
+      background: #28503e;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 16px;
+    }
+
+    section { margin-bottom: 40px; }
+
     h2 { color: #f2c34b; }
+
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
     }
+
     .card {
       background: #10271f;
       border: 1px solid #28503e;
       border-radius: 12px;
       padding: 20px;
     }
+
     .card h3 { color: #f2c34b; margin-top: 0; }
-    .card p { color: #d1ddd6; line-height: 1.6; }
-    .notice {
-      margin-top: 25px;
-      padding: 18px;
-      border-left: 4px solid #f2c34b;
-      background: #10271f;
+
+    .card p {
       color: #d1ddd6;
       line-height: 1.6;
     }
+
+    .price {
+      font-size: 25px;
+      font-weight: bold;
+      color: #f2c34b;
+      margin: 12px 0;
+    }
+
     .auth-box {
       max-width: 500px;
       margin: 25px auto;
@@ -82,6 +133,7 @@
       border: 1px solid #28503e;
       border-radius: 12px;
     }
+
     input {
       width: 100%;
       padding: 13px;
@@ -92,9 +144,72 @@
       color: white;
       font-size: 15px;
     }
-    .auth-box button { margin-right: 8px; margin-top: 10px; }
-    #authMessage { color: #f2c34b; line-height: 1.5; }
+
+    .auth-box button { margin-top: 10px; }
+
+    #authMessage, #fixtureMessage {
+      color: #f2c34b;
+      line-height: 1.5;
+    }
+
     #userArea { color: #c7d5ce; }
+
+    .notice {
+      padding: 17px;
+      border-left: 4px solid #f2c34b;
+      background: #10271f;
+      color: #d1ddd6;
+      line-height: 1.6;
+      border-radius: 5px;
+    }
+
+    .fixture-card {
+      background: #10271f;
+      border: 1px solid #28503e;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .fixture-teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .fixture-team { flex: 1; }
+
+    .fixture-vs {
+      color: #f2c34b;
+      font-size: 13px;
+    }
+
+    .fixture-info {
+      color: #b9c9c0;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 5px;
+      background: #28503e;
+      color: #f2c34b;
+      font-size: 12px;
+    }
+
+    .locked {
+      opacity: .9;
+      border-color: #8c7130;
+    }
+
+    .hidden { display: none !important; }
+
     footer {
       margin-top: 35px;
       padding: 25px;
@@ -102,177 +217,533 @@
       color: #aebdb5;
       text-align: center;
       font-size: 13px;
+      line-height: 1.8;
+    }
+
+    @media(max-width: 600px) {
+      .hero h1 { font-size: 27px; }
+      nav { gap: 12px; }
+      nav a { font-size: 13px; }
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <div class="logo">EMDeals <span>MABAO</span></div>
-    <p>Smart Football Predictions & Match Analysis</p>
-  </header>
 
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#predictions">Predictions</a>
-    <a href="#vip">VVIP</a>
-    <a href="#account">Account</a>
-    <a href="#about">About Us</a>
-  </nav>
+<header>
+  <div class="logo">EMDeals <span>MABAO</span></div>
+  <p>Smart Football Predictions & Match Analysis</p>
+</header>
 
-  <section class="hero" id="home">
-    <h1>Predict Smarter.<br><span>Understand the Game.</span></h1>
-    <p>Football match analysis combining real statistics<br>
-    and independent football thinking.</p>
-    <a class="button" href="#predictions">Explore Predictions</a>
+<nav>
+  <a href="#home">Home</a>
+  <a href="#fixtures">Today's Matches</a>
+  <a href="#predictions">Predictions</a>
+  <a href="#vip">VVIP</a>
+  <a href="#pricing">Prices</a>
+  <a href="#account">Account</a>
+  <a href="#about">About Us</a>
+</nav>
+
+<section class="hero" id="home">
+  <h1>Predict Smarter.<br><span>Understand the Game.</span></h1>
+  <p>
+    Football match analysis combining real statistics
+    and independent football thinking.
+  </p>
+  <a class="button" href="#fixtures">Today's Fixtures</a>
+  <a class="button secondary" href="#account">Member Login</a>
+</section>
+
+<main>
+
+  <!-- TODAY'S FOOTBALL FIXTURES -->
+
+  <section id="fixtures">
+    <h2>Today's Football Fixtures</h2>
+    <p style="color:#c7d5ce">
+      Automatically updated football fixtures for today's matches.
+    </p>
+
+    <button class="button" id="refreshFixtures">
+      Refresh Matches
+    </button>
+
+    <p id="fixtureMessage" aria-live="polite">
+      Loading today's football matches...
+    </p>
+
+    <div id="fixturesList"></div>
   </section>
 
-  <main>
-    <section id="predictions">
-      <h2>Our Prediction Services</h2>
-      <div class="cards">
-        <div class="card">
-          <h3>FREE PREDICTIONS</h3>
-          <p>Access selected daily predictions including BTTS, Double Chance, Over 2.5 and Under 2.5 goals.</p>
-        </div>
-        <div class="card" id="vip">
-          <h3>VVIP PREDICTIONS</h3>
-          <p>Premium match analysis covering a wider range of available football markets for active subscribers.</p>
-        </div>
-        <div class="card">
-          <h3>SMART ANALYSIS</h3>
-          <p>Compare manual football opinions with statistics-based predictions before making decisions.</p>
-        </div>
-        <div class="card">
-          <h3>PERFORMANCE TRACKING</h3>
-          <p>Track recorded predictions against actual match results and review historical performance.</p>
-        </div>
+  <!-- PREDICTION SERVICES -->
+
+  <section id="predictions">
+    <h2>Our Prediction Services</h2>
+
+    <div class="cards">
+
+      <div class="card">
+        <h3>FREE PREDICTIONS</h3>
+        <p>
+          Selected daily predictions including:
+          BTTS, Double Chance, Over 2.5 and Under 2.5 goals.
+        </p>
+        <span class="status">Free access</span>
       </div>
-    </section>
 
-    <section id="account">
-      <h2>Member Account</h2>
-      <div class="auth-box">
-        <h3>Create an account or log in</h3>
-        <input id="email" type="email" placeholder="Your email address" autocomplete="email">
-        <input id="password" type="password" placeholder="Password (minimum 6 characters)" autocomplete="current-password">
-        <button class="button" id="signup">Register</button>
-        <button class="button" id="login">Login</button>
-        <button class="button" id="logout" hidden>Logout</button>
-        <div id="userArea"></div>
-        <p id="authMessage" aria-live="polite">Connecting to member services...</p>
+      <div class="card">
+        <h3>SMART ANALYSIS</h3>
+        <p>
+          Compare football opinions with available match
+          statistics before making decisions.
+        </p>
       </div>
-    </section>
 
-    <section id="about">
-      <h2>About EMDeals Mabao</h2>
-      <div class="notice">
-        Our goal is to provide clear football analysis, transparent prediction records
-        and responsible information. Predictions are estimates, not guaranteed results.
-        Always make informed decisions.
+      <div class="card">
+        <h3>PERFORMANCE TRACKING</h3>
+        <p>
+          Review recorded predictions against actual
+          match results and historical performance.
+        </p>
       </div>
-    </section>
-  </main>
 
-  <footer>
-    © 2026 EMDeals Mabao. All rights reserved.<br>
-    Football predictions are not guaranteed outcomes.
-  </footer>
+    </div>
+  </section>
 
-  <script type="module">
-    import { createClient } from
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  <!-- VVIP -->
 
-    const SUPABASE_URL =
-      'https://rkacvsbinsguilwhrbxv.supabase.co';
+  <section id="vip">
+    <h2>VVIP Predictions</h2>
 
-    const SUPABASE_PUBLISHABLE_KEY =
-      'sb_publishable_TuzRWeTlVYAUu8L0FDDbIA_QmtdZ2cD';
+    <div class="card locked">
+      <h3>EMDeals Mabao Premium</h3>
 
-    const supabase = createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
+      <p>
+        Access a wider range of football markets,
+        subject to available match data and analysis.
+      </p>
 
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const message = document.getElementById('authMessage');
-    const userArea = document.getElementById('userArea');
-    const logoutButton = document.getElementById('logout');
+      <ul style="color:#d1ddd6;line-height:2">
+        <li>Home and Away Win</li>
+        <li>Half-Time and Full-Time</li>
+        <li>Half-Time Correct Score</li>
+        <li>Double Chance</li>
+        <li>Both Teams To Score</li>
+        <li>Over and Under Goals</li>
+        <li>Other available match markets</li>
+      </ul>
 
-    function showMessage(text) {
-      message.textContent = text;
+      <a class="button" href="#pricing">View VVIP Packages</a>
+    </div>
+
+    <p class="notice">
+      VVIP predictions are intended to display matches
+      scheduled for the current day only.
+    </p>
+  </section>
+
+  <!-- SUBSCRIPTION PRICES -->
+
+  <section id="pricing">
+    <h2>VVIP Subscription Packages</h2>
+
+    <div class="cards">
+
+      <div class="card">
+        <h3>Daily</h3>
+        <div class="price">KSh 49</div>
+        <p>1 day access</p>
+      </div>
+
+      <div class="card">
+        <h3>Weekly</h3>
+        <div class="price">KSh 399</div>
+        <p>7 days access</p>
+      </div>
+
+      <div class="card">
+        <h3>Monthly</h3>
+        <div class="price">KSh 1,499</div>
+        <p>30 days access</p>
+      </div>
+
+      <div class="card">
+        <h3>Yearly</h3>
+        <div class="price">KSh 5,700</div>
+        <p>1 year access</p>
+      </div>
+
+    </div>
+
+    <div class="notice">
+      Subscription payment processing and automatic VVIP
+      activation still need to be connected before customers
+      can purchase packages.
+    </div>
+  </section>
+
+  <!-- MEMBER ACCOUNT -->
+
+  <section id="account">
+    <h2>Member Account</h2>
+
+    <div class="auth-box">
+      <h3>Create an account or log in</h3>
+
+      <input
+        id="email"
+        type="email"
+        placeholder="Your email address"
+        autocomplete="email"
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Password (minimum 6 characters)"
+        autocomplete="current-password"
+      >
+
+      <button class="button" id="signup">Register</button>
+      <button class="button" id="login">Login</button>
+      <button class="button secondary hidden" id="logout">Logout</button>
+
+      <div id="userArea"></div>
+
+      <p id="authMessage" aria-live="polite">
+        Connecting to member services...
+      </p>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+
+  <section id="about">
+    <h2>About EMDeals Mabao</h2>
+
+    <div class="notice">
+      Our goal is to provide clear football analysis,
+      transparent prediction records and responsible
+      information.
+
+      Predictions are estimates, not guaranteed results.
+      Always make informed decisions.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © 2026 EMDeals Mabao. All rights reserved.<br>
+  Smart Football Predictions & Match Analysis.<br>
+  Football predictions are not guaranteed outcomes.
+</footer>
+
+<script type="module">
+
+  import { createClient } from
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // SUPABASE CONFIGURATION
+  // This is a public publishable key, NOT a service-role key.
+
+  const SUPABASE_URL =
+    'https://rkacvsbinsguilwhrbxv.supabase.co';
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    'sb_publishable_TuzRWeTlVYAUu8L0FDDbIA_QmtdZ2cD';
+
+  const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+  // ACCOUNT ELEMENTS
+
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const authMessage = document.getElementById('authMessage');
+  const userArea = document.getElementById('userArea');
+
+  const signupButton = document.getElementById('signup');
+  const loginButton = document.getElementById('login');
+  const logoutButton = document.getElementById('logout');
+
+  function showMessage(message) {
+    authMessage.textContent = message;
+  }
+
+  function showUser(user) {
+    if (user) {
+      userArea.textContent = 'Logged in as: ' + user.email;
+      logoutButton.classList.remove('hidden');
+    } else {
+      userArea.textContent = 'You are not logged in.';
+      logoutButton.classList.add('hidden');
+    }
+  }
+
+  // REGISTER
+
+  signupButton.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || password.length < 6) {
+      showMessage(
+        'Enter a valid email and a password of at least 6 characters.'
+      );
+      return;
     }
 
-    function showUser(user) {
-      userArea.textContent = user
-        ? 'Logged in as: ' + user.email
-        : 'You are not logged in.';
-      logoutButton.hidden = !user;
-    }
+    signupButton.disabled = true;
+    showMessage('Creating your account...');
 
-    document.getElementById('signup').addEventListener('click', async () => {
-      if (!email.value || password.value.length < 6) {
-        showMessage('Enter a valid email and password of at least 6 characters.');
-        return;
-      }
-
-      showMessage('Creating your account...');
-
+    try {
       const { data, error } = await supabase.auth.signUp({
-        email: email.value.trim(),
-        password: password.value
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
       });
 
-      if (error) {
-        showMessage(error.message);
-        return;
-      }
+      if (error) throw error;
 
       if (data.session) {
-        showMessage('Registration successful!');
         showUser(data.user);
+        showMessage('Registration successful! Welcome to EMDeals Mabao.');
       } else {
-        showMessage('Registration received. Check your email to confirm your account.');
-      }
-    });
-
-    document.getElementById('login').addEventListener('click', async () => {
-      if (!email.value || !password.value) {
-        showMessage('Enter your email and password.');
-        return;
+        showMessage(
+          'Registration received. Please check your email to confirm your account.'
+        );
       }
 
-      showMessage('Logging in...');
+    } catch (error) {
+      showMessage(error.message);
+    } finally {
+      signupButton.disabled = false;
+    }
+  });
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.value.trim(),
-        password: password.value
-      });
+  // LOGIN
 
-      if (error) {
-        showMessage(error.message);
-        return;
-      }
+  loginButton.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-      showMessage('Welcome back!');
+    if (!email || !password) {
+      showMessage('Enter your email and password.');
+      return;
+    }
+
+    loginButton.disabled = true;
+    showMessage('Logging in...');
+
+    try {
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) throw error;
+
       showUser(data.user);
-    });
+      showMessage('Welcome back!');
 
-    logoutButton.addEventListener('click', async () => {
+    } catch (error) {
+      showMessage(error.message);
+    } finally {
+      loginButton.disabled = false;
+    }
+  });
+
+  // LOGOUT
+
+  logoutButton.addEventListener('click', async () => {
+    logoutButton.disabled = true;
+
+    try {
       const { error } = await supabase.auth.signOut();
 
-      if (error) {
-        showMessage(error.message);
-        return;
-      }
+      if (error) throw error;
 
       showUser(null);
       showMessage('You have logged out successfully.');
-    });
 
-    const { data: { user } } = await supabase.auth.getUser();
-    showUser(user);
-    showMessage('Supabase connected. Member services are ready.');
-  </script>
+    } catch (error) {
+      showMessage(error.message);
+    } finally {
+      logoutButton.disabled = false;
+    }
+  });
+
+  // RESTORE EXISTING SESSION
+
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) throw error;
+
+    showUser(data.user);
+    showMessage(
+      data.user
+        ? 'Welcome back! Member services are ready.'
+        : 'Supabase connected. You can register or log in.'
+    );
+
+  } catch (error) {
+    showUser(null);
+    showMessage('Account connection error: ' + error.message);
+  }
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    showUser(session?.user || null);
+  });
+
+  // FOOTBALL FIXTURES
+
+  const fixturesList = document.getElementById('fixturesList');
+  const fixtureMessage = document.getElementById('fixtureMessage');
+  const refreshButton = document.getElementById('refreshFixtures');
+
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    })[character]);
+  }
+
+  function getFixtureData(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.response)) return data.response;
+    if (Array.isArray(data?.fixtures)) return data.fixtures;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  }
+
+  function renderFixtures(fixtures) {
+    fixturesList.innerHTML = '';
+
+    if (!fixtures.length) {
+      fixturesList.innerHTML =
+        '<div class="notice">No fixtures were returned for today. Please try refreshing later.</div>';
+      return;
+    }
+
+    fixtures.forEach(item => {
+      const fixture = item.fixture || item;
+      const teams = item.teams || {};
+
+      const home =
+        teams.home?.name || item.home || item.home_team || 'Home team';
+
+      const away =
+        teams.away?.name || item.away || item.away_team || 'Away team';
+
+      const league =
+        item.league?.name || item.league || 'Football';
+
+      const date = fixture.date || item.date || item.match_date;
+
+      let time = 'Time unavailable';
+
+      if (date) {
+        time = new Date(date).toLocaleTimeString('en-GB', {
+          timeZone: 'Asia/Dubai',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      const status =
+        fixture.status?.short ||
+        item.status ||
+        'Scheduled';
+
+      const card = document.createElement('div');
+      card.className = 'fixture-card';
+
+      card.innerHTML = `
+        <div class="fixture-teams">
+          <div class="fixture-team">${escapeHTML(home)}</div>
+          <div class="fixture-vs">VS</div>
+          <div class="fixture-team">${escapeHTML(away)}</div>
+        </div>
+        <div class="fixture-info">
+          ${escapeHTML(league)} · ${escapeHTML(time)}
+          <br><br>
+          <span class="status">${escapeHTML(status)}</span>
+        </div>
+      `;
+
+      fixturesList.appendChild(card);
+    });
+  }
+
+  async function loadFixtures() {
+    refreshButton.disabled = true;
+    fixtureMessage.textContent = 'Loading today's fixtures...';
+    fixturesList.innerHTML = '';
+
+    try {
+      const response = await fetch(
+        '/.netlify/functions/fixtures',
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          'Fixtures service returned error ' + response.status
+        );
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const fixtures = getFixtureData(data);
+
+      renderFixtures(fixtures);
+
+      fixtureMessage.textContent =
+        'Football fixtures loaded successfully.';
+
+    } catch (error) {
+      fixtureMessage.textContent =
+        'Unable to load fixtures: ' + error.message;
+
+      fixturesList.innerHTML = `
+        <div class="notice">
+          The fixtures service could not be reached.
+          Please try again later.
+        </div>
+      `;
+
+    } finally {
+      refreshButton.disabled = false;
+    }
+  }
+
+  refreshButton.addEventListener('click', loadFixtures);
+
+  // LOAD FIXTURES WHEN PAGE OPENS
+
+  loadFixtures();
+
+</script>
+
 </body>
 </html>
