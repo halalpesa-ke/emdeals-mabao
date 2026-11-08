@@ -6,6 +6,7 @@ exports.handler = async function () {
     return {
       statusCode: 500,
       body: JSON.stringify({
+        success: false,
         error: "API_FOOTBALL_KEY is missing in Netlify"
       })
     };
@@ -23,11 +24,33 @@ exports.handler = async function () {
       }
     );
 
-    if (!response.ok) {
+    const data = await response.json();
+
+    if (!response.ok || data.errors?.length) {
       throw new Error("Football API request failed");
     }
 
-    const data = await response.json();
+    const matches = (data.response || []).map(match => ({
+      fixture_id: match.fixture.id,
+      date: match.fixture.date,
+      status: match.fixture.status.short,
+
+      league: match.league.name,
+      league_id: match.league.id,
+      country: match.league.country,
+      season: match.league.season,
+
+      home_team: match.teams.home.name,
+      home_team_id: match.teams.home.id,
+      home_logo: match.teams.home.logo,
+
+      away_team: match.teams.away.name,
+      away_team_id: match.teams.away.id,
+      away_logo: match.teams.away.logo,
+
+      home_score: match.goals.home,
+      away_score: match.goals.away
+    }));
 
     return {
       statusCode: 200,
@@ -38,26 +61,18 @@ exports.handler = async function () {
       body: JSON.stringify({
         success: true,
         date: today,
-        total: data.response.length,
-        matches: data.response.map(match => ({
-          fixture_id: match.fixture.id,
-          date: match.fixture.date,
-          status: match.fixture.status.short,
-          league: match.league.name,
-          country: match.league.country,
-          home_team: match.teams.home.name,
-          away_team: match.teams.away.name,
-          home_logo: match.teams.home.logo,
-          away_logo: match.teams.away.logo,
-          home_score: match.goals.home,
-          away_score: match.goals.away
-        }))
+        total: matches.length,
+        matches
       })
     };
 
   } catch (error) {
     return {
       statusCode: 500,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      },
       body: JSON.stringify({
         success: false,
         error: error.message
