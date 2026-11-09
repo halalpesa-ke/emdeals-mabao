@@ -1,6 +1,6 @@
 
 exports.handler = async function () {
-  const API_KEY = process.env.API_FOOTBALL_KEY;
+  const API_TOKEN = process.env.FOOTBALL_DATA_API_TOKEN;
 
   const headers = {
     "Content-Type": "application/json",
@@ -14,10 +14,11 @@ exports.handler = async function () {
     body: JSON.stringify(data)
   });
 
-  if (!API_KEY) {
+  if (!API_TOKEN) {
     return send(500, {
       success: false,
-      error: "API_FOOTBALL_KEY is missing in Netlify."
+      error: "FOOTBALL_DATA_API_TOKEN is missing in Netlify.",
+      matches: []
     });
   }
 
@@ -30,64 +31,72 @@ exports.handler = async function () {
       day: "2-digit"
     }).format(new Date());
 
-    // Request today's fixtures
+    // Request today's matches from football-data.org
     const response = await fetch(
-      `https://v3.football.api-sports.io/fixtures?date=${today}`,
+      `https://api.football-data.org/v4/matches?dateFrom=${today}&dateTo=${today}`,
       {
         method: "GET",
         headers: {
-          "x-apisports-key": API_KEY
+          "X-Auth-Token": API_TOKEN
         }
       }
     );
 
     const data = await response.json();
 
-    // Check API errors
-    if (!response.ok || (data.errors && Object.keys(data.errors).length > 0)) {
-      return send(502, {
+    if (!response.ok) {
+      return send(response.status, {
         success: false,
-        date: today,
-        error: data.errors || `Football API error: ${response.status}`,
+        error: data.message || data.error || "Football data API request failed.",
         matches: []
       });
     }
 
-    // Format fixtures
-    const matches = (data.response || []).map(item => ({
-      fixtureId: item.fixture.id,
-      date: item.fixture.date,
-      timestamp: item.fixture.timestamp,
-      status: item.fixture.status.short,
-      statusLong: item.fixture.status.long,
+    // Format matches for EMDeals Mabao
+    const matches = (data.matches || []).map(match => ({
+      fixtureId: match.id,
+      id: match.id,
 
-      league: item.league.name,
-      country: item.league.country,
-      leagueLogo: item.league.logo,
+      date: match.utcDate,
+      timestamp: new Date(match.utcDate).getTime(),
 
-      home: item.teams.home.name,
-      away: item.teams.away.name,
+      status: match.status,
+      matchday: match.matchday,
 
-      homeTeam: item.teams.home.name,
-      awayTeam: item.teams.away.name,
+      league: match.competition?.name || "Unknown",
+      competition: match.competition?.name || "Unknown",
+      leagueCode: match.competition?.code || "",
+      leagueLogo: match.competition?.emblem || "",
 
-      homeId: item.teams.home.id,
-      awayId: item.teams.away.id,
+      country: match.area?.name || "",
 
-      homeLogo: item.teams.home.logo,
-      awayLogo: item.teams.away.logo,
+      home: match.homeTeam?.name || "Unknown",
+      away: match.awayTeam?.name || "Unknown",
 
-      homeGoals: item.goals.home,
-      awayGoals: item.goals.away,
+      homeTeam: match.homeTeam?.name || "Unknown",
+      awayTeam: match.awayTeam?.name || "Unknown",
 
-      venue: item.fixture.venue.name || "TBA"
+      homeId: match.homeTeam?.id || null,
+      awayId: match.awayTeam?.id || null,
+
+      homeLogo: match.homeTeam?.crest || "",
+      awayLogo: match.awayTeam?.crest || "",
+
+      homeGoals: match.score?.fullTime?.home ?? null,
+      awayGoals: match.score?.fullTime?.away ?? null,
+
+      halfTimeHome: match.score?.halfTime?.home ?? null,
+      halfTimeAway: match.score?.halfTime?.away ?? null,
+
+      venue: match.venue || "TBA"
     }));
 
     return send(200, {
       success: true,
+      provider: "football-data.org",
       date: today,
       total: matches.length,
-      matches
+      matches: matches
     });
 
   } catch (error) {
