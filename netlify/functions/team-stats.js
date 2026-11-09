@@ -1,13 +1,29 @@
 
 exports.handler = async function (event) {
-  const API_KEY = process.env.API_FOOTBALL_KEY;
+  const API_TOKEN = process.env.FOOTBALL_DATA_API_TOKEN;
 
-  if (!API_KEY) {
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, OPTIONS"
+  };
+
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers,
+      body: ""
+    };
+  }
+
+  if (!API_TOKEN) {
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({
         success: false,
-        error: "API_FOOTBALL_KEY is missing in Netlify"
+        error: "FOOTBALL_DATA_API_TOKEN is missing in Netlify"
       })
     };
   }
@@ -24,6 +40,7 @@ exports.handler = async function (event) {
   ) {
     return {
       statusCode: 400,
+      headers,
       body: JSON.stringify({
         success: false,
         error: "Please provide valid home_team_id and away_team_id"
@@ -33,24 +50,50 @@ exports.handler = async function (event) {
 
   try {
     async function getTeamStats(teamId) {
-      const response = await fetch(
-        `https://v3.football.api-sports.io/fixtures?team=${teamId}&last=5`,
-        {
-          headers: {
-            "x-apisports-key": API_KEY
-          }
-        }
+      const today = new Date();
+      const dateTo = today.toISOString().slice(0, 10);
+
+      const past = new Date();
+      past.setUTCDate(past.getUTCDate() - 365);
+      const dateFrom = past.toISOString().slice(0, 10);
+
+      const url = new URL(
+        `https://api.football-data.org/v4/teams/${teamId}/matches`
       );
+
+      url.searchParams.set("status", "FINISHED");
+      url.searchParams.set("dateFrom", dateFrom);
+      url.searchParams.set("dateTo", dateTo);
+      url.searchParams.set("limit", "100");
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          "X-Auth-Token": API_TOKEN
+        }
+      });
 
       const data = await response.json();
 
-      if (!response.ok || data.errors?.length) {
-        throw new Error("Could not retrieve team statistics");
+      if (!response.ok) {
+        throw new Error(
+          `football-data.org error ${response.status}: ${
+            data.message || data.error || "Unable to retrieve team matches"
+          }`
+        );
       }
 
-      const completed = (data.response || []).filter(match =>
-        ["FT", "AET", "PEN"].includes(match.fixture.status.short)
-      );
+      const completed = (data.matches || [])
+        .filter(match =>
+          match.status === "FINISHED" &&
+          match.score?.fullTime?.home !== null &&
+          match.score?.fullTime?.away !== null &&
+          match.score?.fullTime?.home !== undefined &&
+          match.score?.fullTime?.away !== undefined
+        )
+        .sort((a, b) =>
+          new Date(b.utcDate) - new Date(a.utcDate)
+        )
+        .slice(0, 5);
 
       let wins = 0;
       let draws = 0;
@@ -59,17 +102,15 @@ exports.handler = async function (event) {
       let goalsAgainst = 0;
 
       const matches = completed.map(match => {
-        const isHome = match.teams.home.id === teamId;
+        const isHome = match.homeTeam.id === teamId;
 
         const scored = isHome
-          ? match.goals.home
-          : match.goals.away;
+          ? match.score.fullTime.home
+          : match.score.fullTime.away;
 
         const conceded = isHome
-          ? match.goals.away
-          : match.goals.home;
-
-        if (scored === null || conceded === null) return null;
+          ? match.score.fullTime.away
+          : match.score.fullTime.home;
 
         goalsFor += scored;
         goalsAgainst += conceded;
@@ -89,16 +130,25 @@ exports.handler = async function (event) {
 
         return {
           opponent: isHome
-            ? match.teams.away.name
-            : match.teams.home.name,
+            ? match.awayTeam.name
+            : match.homeTeam.name,
+          competition: match.competition?.name || "Unknown",
+          date: match.utcDate,
           scored,
           conceded,
           result
         };
-      }).filter(Boolean);
+      });
 
       return {
         team_id: teamId,
+        team_name: completed.length
+          ? (
+              completed[0].homeTeam.id === teamId
+                ? completed[0].homeTeam.name
+                : completed[0].awayTeam.name
+            )
+          : "Team " + teamId,
         matches_played: matches.length,
         wins,
         draws,
@@ -123,12 +173,10 @@ exports.handler = async function (event) {
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      },
+      headers,
       body: JSON.stringify({
         success: true,
+        provider: "football-data.org",
         home_team: home,
         away_team: away
       })
@@ -137,12 +185,10 @@ exports.handler = async function (event) {
   } catch (error) {
     return {
       statusCode: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      },
+      headers,
       body: JSON.stringify({
         success: false,
+        provider: "football-data.org",
         error: error.message
       })
     };
