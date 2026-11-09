@@ -4,22 +4,25 @@ exports.handler = async function () {
 
   const headers = {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*"
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS"
   };
 
+  const send = (statusCode, data) => ({
+    statusCode,
+    headers,
+    body: JSON.stringify(data)
+  });
+
   if (!API_KEY) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({
-        success: false,
-        error: "API_FOOTBALL_KEY is missing in Netlify environment variables."
-      })
-    };
+    return send(500, {
+      success: false,
+      error: "API_FOOTBALL_KEY is missing in Netlify."
+    });
   }
 
   try {
-    // Get today's date using UAE time
+    // Get today's date in UAE time
     const today = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Dubai",
       year: "numeric",
@@ -27,7 +30,7 @@ exports.handler = async function () {
       day: "2-digit"
     }).format(new Date());
 
-    // Request today's football fixtures
+    // Request today's fixtures
     const response = await fetch(
       `https://v3.football.api-sports.io/fixtures?date=${today}`,
       {
@@ -40,75 +43,58 @@ exports.handler = async function () {
 
     const data = await response.json();
 
-    // Check API response
-    if (!response.ok) {
-      throw new Error(
-        `Football API HTTP error: ${response.status}`
-      );
+    // Check API errors
+    if (!response.ok || (data.errors && Object.keys(data.errors).length > 0)) {
+      return send(502, {
+        success: false,
+        date: today,
+        error: data.errors || `Football API error: ${response.status}`,
+        matches: []
+      });
     }
 
-    if (data.errors && Object.keys(data.errors).length > 0) {
-      throw new Error(
-        JSON.stringify(data.errors)
-      );
-    }
+    // Format fixtures
+    const matches = (data.response || []).map(item => ({
+      fixtureId: item.fixture.id,
+      date: item.fixture.date,
+      timestamp: item.fixture.timestamp,
+      status: item.fixture.status.short,
+      statusLong: item.fixture.status.long,
 
-    // Format match information
-    const matches = (data.response || []).map(match => ({
-      fixture_id: match.fixture.id,
-      date: match.fixture.date,
-      timestamp: match.fixture.timestamp,
-      timezone: match.fixture.timezone,
-      status: match.fixture.status.short,
-      status_long: match.fixture.status.long,
-      elapsed: match.fixture.status.elapsed,
+      league: item.league.name,
+      country: item.league.country,
+      leagueLogo: item.league.logo,
 
-      league: match.league.name,
-      league_id: match.league.id,
-      country: match.league.country,
-      season: match.league.season,
-      round: match.league.round,
+      home: item.teams.home.name,
+      away: item.teams.away.name,
 
-      home_team: match.teams.home.name,
-      home_team_id: match.teams.home.id,
-      home_logo: match.teams.home.logo,
-      home_winner: match.teams.home.winner,
+      homeTeam: item.teams.home.name,
+      awayTeam: item.teams.away.name,
 
-      away_team: match.teams.away.name,
-      away_team_id: match.teams.away.id,
-      away_logo: match.teams.away.logo,
-      away_winner: match.teams.away.winner,
+      homeId: item.teams.home.id,
+      awayId: item.teams.away.id,
 
-      home_score: match.goals.home,
-      away_score: match.goals.away,
+      homeLogo: item.teams.home.logo,
+      awayLogo: item.teams.away.logo,
 
-      halftime_home: match.score.halftime.home,
-      halftime_away: match.score.halftime.away,
+      homeGoals: item.goals.home,
+      awayGoals: item.goals.away,
 
-      fulltime_home: match.score.fulltime.home,
-      fulltime_away: match.score.fulltime.away
+      venue: item.fixture.venue.name || "TBA"
     }));
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        success: true,
-        date: today,
-        timezone: "Asia/Dubai",
-        total: matches.length,
-        matches
-      })
-    };
+    return send(200, {
+      success: true,
+      date: today,
+      total: matches.length,
+      matches
+    });
 
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({
-        success: false,
-        error: error.message
-      })
-    };
+    return send(500, {
+      success: false,
+      error: error.message,
+      matches: []
+    });
   }
 };
